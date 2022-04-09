@@ -1,0 +1,16 @@
+use_gpu: true
+exp_name: beta5
+
+dataroot: ../../data
+beta: 5
+
+comm_rounds: 100
+local_epochs: 10
+n_parties: 10
+batch_size: 64
+
+lr: 0.01
+weight_decay: 0.00001
+momentum: 0.9
+
+save_per_rounds: ~
