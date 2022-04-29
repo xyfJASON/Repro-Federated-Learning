@@ -7,13 +7,15 @@ import torchvision.transforms as T
 
 class DatasetPartitioner:
     """ Partition the dataset into several parts. """
-    def __init__(self, dataset: Dataset, n_classes: int, n_parties: int, beta: float = None, random_seed=None, label_name='targets'):
+    def __init__(self, dataset: Dataset, n_classes: int, n_parties: int, method: str = 'IID',
+                 beta: float = None, random_seed=None, label_name='targets'):
         """
 
         Args:
             dataset: the dataset to be partitioned
             n_classes: number of classes
             n_parties: number of parties
+            method: partition method, options: 'IID'(default), 'Dirichlet'
             beta: parameter of dirichlet distribution
             random_seed: random seed
             label_name: name of attribute label in class dataset
@@ -30,17 +32,25 @@ class DatasetPartitioner:
             targets = np.array([label for _, label in dataset])
 
         cnt_party_class = np.zeros((n_parties, n_classes), dtype=int)
-        self.idx_parties = [[] for _ in range(n_parties)]  # index in each party
-        for c in range(n_classes):
-            idx_c = np.where(targets == c)[0]
-            rng.shuffle(idx_c)
-            proportions = rng.dirichlet(alpha=[beta]*n_parties)  # (n_parties, )
-            partition_pos = (np.cumsum(proportions) * len(idx_c)).astype(int).tolist()[:-1]
-            for idx, idx_split in zip(self.idx_parties, np.split(idx_c, partition_pos)):
-                idx.extend(idx_split)
-            cnt_party_class[:, c] += np.diff([0] + partition_pos + [len(idx_c)])
-        for p in range(n_parties):
-            rng.shuffle(self.idx_parties[p])
+        if method == 'IID':
+            idxs = rng.permutation(len(targets))
+            self.idx_parties = np.array_split(idxs, indices_or_sections=n_parties)
+            for p in range(n_parties):
+                cnt_party_class[p] = np.bincount(targets[self.idx_parties[p]], minlength=n_classes)
+        elif method == 'Dirichlet':
+            self.idx_parties = [[] for _ in range(n_parties)]  # index in each party
+            for c in range(n_classes):
+                idx_c = np.where(targets == c)[0]
+                rng.shuffle(idx_c)
+                proportions = rng.dirichlet(alpha=[beta]*n_parties)  # (n_parties, )
+                partition_pos = (np.cumsum(proportions) * len(idx_c)).astype(int).tolist()[:-1]
+                for idx, idx_split in zip(self.idx_parties, np.split(idx_c, partition_pos)):
+                    idx.extend(idx_split)
+                cnt_party_class[:, c] += np.diff([0] + partition_pos + [len(idx_c)])
+            for p in range(n_parties):
+                rng.shuffle(self.idx_parties[p])
+        else:
+            raise ValueError
 
         print('Data partition:')
         for p in range(n_parties):

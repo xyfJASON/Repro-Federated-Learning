@@ -11,8 +11,8 @@ import torchvision.datasets as dset
 import torchvision.transforms as T
 
 from model import SimpleCNN
-from dataset import DatasetPartitioner
 from engine import Client, Server
+from utils.partition_data import DatasetPartitioner
 from utils.general_utils import parse_config
 
 
@@ -48,7 +48,13 @@ class Trainer:
         train_dataset = dset.CIFAR10(root=self.config['dataroot'], train=True, transform=train_transform, download=False)
         test_dataset = dset.CIFAR10(root=self.config['dataroot'], train=False, transform=test_transform, download=False)
 
-        partitioner = DatasetPartitioner(dataset=train_dataset, n_classes=10, n_parties=self.config['n_parties'], beta=self.config['beta'])
+        if self.config['partition']['choice'] == 'IID':
+            partitioner = DatasetPartitioner(dataset=train_dataset, n_classes=10, n_parties=self.config['n_parties'], method='IID')
+        elif self.config['partition']['choice'] == 'Dirichlet':
+            partitioner = DatasetPartitioner(dataset=train_dataset, n_classes=10, n_parties=self.config['n_parties'],
+                                             method='Dirichlet', beta=self.config['partition']['Dirichlet']['beta'])
+        else:
+            raise ValueError(f"{self.config['partition']['choice']} is not a valid partition method")
         train_dataset_list = [partitioner.get_dataset(i) for i in range(self.config['n_parties'])]
         train_loader_list = [DataLoader(dataset, batch_size=self.config['batch_size'], shuffle=True, num_workers=4, pin_memory=True)
                              for dataset in train_dataset_list]

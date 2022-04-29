@@ -2,7 +2,11 @@ use_gpu: true
 exp_name: ~
 
 dataroot: ../../data
-beta: 0.5
+
+partition:
+  choice: Dirichlet
+  Dirichlet:
+    beta: 0.5
 
 comm_rounds: 100
 local_epochs: 10
