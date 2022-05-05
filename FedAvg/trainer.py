@@ -1,6 +1,7 @@
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -76,8 +77,11 @@ class Trainer:
         print('==> Training...')
         for comm_round in range(self.config['comm_rounds']):
             print(f'communication round: {comm_round}')
-            for i, client in enumerate(self.client_list):
+            n_select = max(1, int(self.config['n_parties'] * self.config['select_frac']))
+            select_clients = sorted(np.random.choice(range(self.config['n_parties']), (n_select, ), replace=False))
+            for i in select_clients:
                 print(f'\tclient{i}:')
+                client = self.client_list[i]
                 client.load_param(self.server.model.state_dict())
                 for local_epoch in range(self.config['local_epochs']):
                     train_loss = client.train_one_epoch()
