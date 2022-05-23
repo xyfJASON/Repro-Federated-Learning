@@ -12,7 +12,7 @@ import torchvision.datasets as dset
 import torchvision.transforms as T
 
 from model import SimpleCNN
-from engine import Client, Server
+from fed import Client, Server
 from utils.partition_data import DatasetPartitioner
 from utils.general_utils import parse_config
 
@@ -39,8 +39,8 @@ class Trainer:
     def _get_data(self):
         print(f'==> Getting data...')
         train_transform = T.Compose([T.Resize((32, 32)),
-                                     T.RandomCrop((32, 32), padding=4, padding_mode='reflect'),
-                                     T.RandomHorizontalFlip(),
+                                     # T.RandomCrop((32, 32), padding=4, padding_mode='reflect'),
+                                     # T.RandomHorizontalFlip(),
                                      T.ToTensor(),
                                      T.Normalize([0.4914, 0.4822, 0.4465], [0.2470, 0.2435, 0.2616])])
         test_transform = T.Compose([T.Resize((32, 32)),
