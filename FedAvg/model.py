@@ -13,9 +13,7 @@ class SimpleCNN(nn.Module):
         self.flatten = nn.Flatten()
         self.fc1 = nn.Linear(400, 120)
         self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 84)
-        self.fc4 = nn.Linear(84, 256)
-        self.classifier = nn.Linear(256, 10)
+        self.classifier = nn.Linear(84, 10)
 
     def forward(self, X: torch.Tensor):
         X = self.pool1(F.relu(self.conv1(X)))
@@ -23,8 +21,6 @@ class SimpleCNN(nn.Module):
         X = self.flatten(X)
         X = F.relu(self.fc1(X))
         X = F.relu(self.fc2(X))
-        X = F.relu(self.fc3(X))
-        X = self.fc4(X)
         y = self.classifier(X)
         return y
 
