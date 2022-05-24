@@ -9,15 +9,10 @@
 The following hyper-parameters are fixed for all experiments:
 
 - Number of clients: 10
-
 - Communication rounds: 100
-
 - Local epochs: 10
-
 - Batch size: 64
-
 - Network architecture (SimpleCNN):
-
   ```
   conv(3, 6, 5) + relu + maxpool
   conv(6, 16, 5) + relu + maxpool
@@ -25,12 +20,12 @@ The following hyper-parameters are fixed for all experiments:
   linear(120, 84) + relu
   linear(84, 10)
   ```
-
 - Optimizer: SGD
-
   - learning rate: 0.01
   - weight decay: 0.00001
   - momentum: 0.9
+
+
 
 I use two kinds of data partition methods: `IID` and `Dirichlet`.
 
