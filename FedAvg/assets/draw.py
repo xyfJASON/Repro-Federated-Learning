@@ -35,4 +35,4 @@ def plot_fedavg_aug():
 if __name__ == '__main__':
     result = pd.read_csv('./results.csv')
     plot_fedavg()
-    plot_fedavg_aug()
+    # plot_fedavg_aug()

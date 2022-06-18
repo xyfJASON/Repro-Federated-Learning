@@ -54,8 +54,22 @@ class Trainer:
         elif self.config['partition']['choice'] == 'Dirichlet':
             partitioner = DatasetPartitioner(dataset=train_dataset, n_classes=10, n_parties=self.config['n_parties'],
                                              method='Dirichlet', beta=self.config['partition']['Dirichlet']['beta'])
+        elif self.config['partition']['choice'] == 'NonIID':
+            partitioner = DatasetPartitioner(dataset=train_dataset, n_classes=10, n_parties=self.config['n_parties'],
+                                             method='NonIID', n_class_each_client=self.config['partition']['NonIID']['n_class_each_client'])
+        elif self.config['partition']['choice'] == 'read_from_file':
+            partitioner = DatasetPartitioner(dataset=train_dataset, n_classes=10, n_parties=self.config['n_parties'],
+                                             method='read_from_file', file_path=self.config['partition']['read_from_file']['file_path'])
         else:
             raise ValueError(f"{self.config['partition']['choice']} is not a valid partition method")
+
+        with open(os.path.join(self.log_root, 'idx_parties.txt'), 'w') as f:
+            for p, idx in enumerate(partitioner.get_idx_parites()):
+                if isinstance(idx, np.ndarray):
+                    idx = idx.tolist()
+                f.write(' '.join(map(str, idx)))
+                f.write('\n')
+
         train_dataset_list = [partitioner.get_dataset(i) for i in range(self.config['n_parties'])]
         train_loader_list = [DataLoader(dataset, batch_size=self.config['batch_size'], shuffle=True, num_workers=4, pin_memory=True)
                              for dataset in train_dataset_list]

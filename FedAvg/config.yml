@@ -7,6 +7,10 @@ partition:
   choice: Dirichlet
   Dirichlet:
     beta: 0.5
+  NonIID:
+    n_class_each_client: 2
+  read_from_file:
+    file_path: ./runs/beta0.1/idx_parties.txt
 
 comm_rounds: 100
 local_epochs: 10
